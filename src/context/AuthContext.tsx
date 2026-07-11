@@ -25,8 +25,15 @@ function translateAuthError(code: string): string {
       return 'Correo o contraseña incorrectos.';
     case 'auth/too-many-requests':
       return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
+    case 'auth/unauthorized-domain':
+      return 'Este sitio todavía no está autorizado en Firebase (Authentication → Settings → Authorized domains).';
+    case 'auth/operation-not-allowed':
+    case 'auth/configuration-not-found':
+      return 'El inicio de sesión con correo/contraseña no está habilitado en Firebase todavía.';
+    case 'auth/network-request-failed':
+      return 'No se pudo conectar. Revisa tu conexión a internet e intenta de nuevo.';
     default:
-      return 'Ocurrió un error. Intenta de nuevo.';
+      return code ? `Ocurrió un error (${code}). Intenta de nuevo.` : 'Ocurrió un error. Intenta de nuevo.';
   }
 }
 
@@ -59,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (name) await updateProfile(cred.user, { displayName: name });
       setUser({ ...cred.user });
     } catch (err) {
+      console.error('Firebase signUp error:', err);
       throw new Error(translateAuthError((err as { code?: string }).code ?? ''));
     }
   };
@@ -68,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
+      console.error('Firebase logIn error:', err);
       throw new Error(translateAuthError((err as { code?: string }).code ?? ''));
     }
   };
