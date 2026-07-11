@@ -1,8 +1,9 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { CATALOG } from '../data/catalog';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { formatQuoteDate, nextQuoteNumber } from '../lib/format';
 import { ACCENTS, STATUS_CYCLE } from '../data/conditions';
+import { useAuth } from './AuthContext';
 import type {
   CatalogItem,
   Cart,
@@ -100,6 +101,19 @@ interface AppProviderProps {
 
 export function AppProvider({ children, storageKey, defaultDesigner }: AppProviderProps) {
   const [state, setState] = useLocalStorage<PersistedState>(storageKey, initialState(defaultDesigner));
+  const { user } = useAuth();
+
+  // Backfills the designer's name/email from the Firebase account whenever those fields are still
+  // empty — covers accounts created before this synced automatically, not just brand-new ones.
+  useEffect(() => {
+    if (!user) return;
+    setState(s => {
+      const name = s.designer.name || user.displayName || '';
+      const email = s.designer.email || user.email || '';
+      if (name === s.designer.name && email === s.designer.email) return s;
+      return { ...s, designer: { ...s.designer, name, email } };
+    });
+  }, [user, setState]);
 
   const setDesignerField = useCallback((field: keyof DesignerProfile, value: string) => {
     setState(s => ({ ...s, designer: { ...s.designer, [field]: value } }));
