@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 const ACTIVE = '#22D3EE';
 const INACTIVE = 'rgba(245,245,242,0.45)';
@@ -7,7 +7,7 @@ const INACTIVE = 'rgba(245,245,242,0.45)';
 export function BottomNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { logout } = useApp();
+  const { logOut } = useAuth();
 
   const dashboardColor = pathname === '/dashboard' ? ACTIVE : INACTIVE;
   const pricesColor = pathname === '/prices' ? ACTIVE : INACTIVE;
@@ -55,7 +55,7 @@ export function BottomNav() {
       </button>
 
       <button
-        onClick={() => { logout(); navigate('/'); }}
+        onClick={() => { logOut(); navigate('/'); }}
         className="flex flex-col items-center gap-1 px-2.5 py-1 bg-transparent border-none cursor-pointer"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={INACTIVE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

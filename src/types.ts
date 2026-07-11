@@ -62,8 +62,3 @@ export interface QuoteRecord {
   logoUrl: string | null;
   accentColor: string;
 }
-
-export interface Account {
-  name: string;
-  email: string;
-}

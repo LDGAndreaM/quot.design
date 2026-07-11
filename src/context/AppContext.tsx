@@ -4,7 +4,6 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { formatQuoteDate, nextQuoteNumber } from '../lib/format';
 import { ACCENTS, STATUS_CYCLE } from '../data/conditions';
 import type {
-  Account,
   CatalogItem,
   Cart,
   ClientInfo,
@@ -15,8 +14,6 @@ import type {
 } from '../types';
 
 interface PersistedState {
-  loggedIn: boolean;
-  account: Account | null;
   catalog: CatalogItem[];
   designer: DesignerProfile;
   history: QuoteRecord[];
@@ -52,26 +49,24 @@ const SEED_HISTORY: QuoteRecord[] = [
   },
 ];
 
-const INITIAL_STATE: PersistedState = {
-  loggedIn: false,
-  account: null,
-  catalog: CATALOG.map(p => ({ ...p })),
-  designer: { name: '', email: '', phone: '' },
-  history: SEED_HISTORY,
-  cart: {},
-  quoteCurrency: 'MXN',
-  client: { name: '', company: '', email: '' },
-  quoteNotes: '',
-  conditionsChecked: {},
-  customConditions: [],
-  logoUrl: null,
-  accentColor: ACCENTS[0],
-  lastQuote: null,
-};
+function initialState(designer: DesignerProfile): PersistedState {
+  return {
+    catalog: CATALOG.map(p => ({ ...p })),
+    designer,
+    history: SEED_HISTORY,
+    cart: {},
+    quoteCurrency: 'MXN',
+    client: { name: '', company: '', email: '' },
+    quoteNotes: '',
+    conditionsChecked: {},
+    customConditions: [],
+    logoUrl: null,
+    accentColor: ACCENTS[0],
+    lastQuote: null,
+  };
+}
 
 interface AppContextValue extends PersistedState {
-  login: (email: string, name?: string) => void;
-  logout: () => void;
   setDesignerField: (field: keyof DesignerProfile, value: string) => void;
   setCatalogPrice: (id: number, field: 'mxn' | 'usd', value: string) => void;
   toggleCartItem: (id: number) => void;
@@ -94,22 +89,16 @@ interface AppContextValue extends PersistedState {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useLocalStorage<PersistedState>('quotdesign:v1', INITIAL_STATE);
+interface AppProviderProps {
+  children: ReactNode;
+  /** Namespaces localStorage per signed-in account (or 'guest' when signed out) so accounts sharing a device don't see each other's data. */
+  storageKey: string;
+  /** Prefills the designer profile the first time this storageKey is seen (e.g. from the Firebase account). */
+  defaultDesigner: DesignerProfile;
+}
 
-  const login = useCallback((email: string, name?: string) => {
-    const resolvedName = name || (email ? email.split('@')[0] : 'Diseñador');
-    setState(s => ({
-      ...s,
-      loggedIn: true,
-      account: { name: resolvedName, email },
-      designer: { ...s.designer, name: s.designer.name || resolvedName },
-    }));
-  }, [setState]);
-
-  const logout = useCallback(() => {
-    setState(s => ({ ...s, loggedIn: false }));
-  }, [setState]);
+export function AppProvider({ children, storageKey, defaultDesigner }: AppProviderProps) {
+  const [state, setState] = useLocalStorage<PersistedState>(storageKey, initialState(defaultDesigner));
 
   const setDesignerField = useCallback((field: keyof DesignerProfile, value: string) => {
     setState(s => ({ ...s, designer: { ...s.designer, [field]: value } }));
@@ -287,8 +276,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppContextValue>(() => ({
     ...state,
-    login,
-    logout,
     setDesignerField,
     setCatalogPrice,
     toggleCartItem,
@@ -308,7 +295,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openHistoryItem,
     resetWizardDraft,
   }), [
-    state, login, logout, setDesignerField, setCatalogPrice, toggleCartItem, incQty, decQty,
+    state, setDesignerField, setCatalogPrice, toggleCartItem, incQty, decQty,
     setCartPrice, switchCurrency, setClientField, setQuoteNotes, toggleCondition, addCondition,
     removeCondition, setLogoUrl, setAccentColor, generateQuote, cycleStatus, openHistoryItem, resetWizardDraft,
   ]);

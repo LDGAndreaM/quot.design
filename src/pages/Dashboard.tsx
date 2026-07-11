@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { fmt } from '../lib/format';
 import { HistoryRow } from '../components/HistoryRow';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { designer, account, history, cycleStatus, openHistoryItem } = useApp();
+  const { designer, history, cycleStatus, openHistoryItem } = useApp();
+  const { user } = useAuth();
 
-  const name = designer.name || account?.name || 'Diseñador(a)';
+  const name = designer.name || user?.displayName || 'Diseñador(a)';
   const historyTotal = history.filter(h => h.currency === 'MXN').reduce((a, h) => a + h.total, 0);
   const recent = history.slice(0, 3);
 

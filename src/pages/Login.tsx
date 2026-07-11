@@ -1,20 +1,53 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 type AuthMode = 'login' | 'register';
 
 export function Login() {
   const navigate = useNavigate();
-  const { login } = useApp();
+  const { signUp, logIn } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [regName, setRegName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    login(email, regName || undefined);
-    navigate('/dashboard');
+  const switchMode = (next: AuthMode) => {
+    setMode(next);
+    setError(null);
+  };
+
+  const handleSubmit = async () => {
+    setError(null);
+
+    if (!email.trim() || !password) {
+      setError('Ingresa tu correo y contraseña.');
+      return;
+    }
+    if (mode === 'register' && !regName.trim()) {
+      setError('Ingresa tu nombre completo.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      if (mode === 'register') {
+        await signUp(email.trim(), password, regName.trim());
+      } else {
+        await logIn(email.trim(), password);
+      }
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ocurrió un error. Intenta de nuevo.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputStyle = 'w-full bg-card border border-white/10 rounded-[10px] px-3.5 py-3 text-ink text-[13.5px]';
@@ -35,14 +68,14 @@ export function Login() {
 
       <div className="flex bg-card rounded-xl p-1 mb-[22px] border border-white/7">
         <button
-          onClick={() => setMode('login')}
+          onClick={() => switchMode('login')}
           className={tabBase}
           style={{ background: mode === 'login' ? '#22D3EE' : 'transparent', color: mode === 'login' ? '#062024' : 'rgba(245,245,242,0.55)' }}
         >
           Iniciar sesión
         </button>
         <button
-          onClick={() => setMode('register')}
+          onClick={() => switchMode('register')}
           className={tabBase}
           style={{ background: mode === 'register' ? '#22D3EE' : 'transparent', color: mode === 'register' ? '#062024' : 'rgba(245,245,242,0.55)' }}
         >
@@ -59,7 +92,7 @@ export function Login() {
         )}
         <div>
           <div className="text-[11.5px] text-ink/50 mb-1.5">Correo electrónico</div>
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.com" className={inputStyle} />
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.com" className={inputStyle} />
         </div>
         <div>
           <div className="text-[11.5px] text-ink/50 mb-1.5">Contraseña</div>
@@ -67,15 +100,17 @@ export function Login() {
         </div>
       </div>
 
+      {error && (
+        <div className="mt-3 text-[12px] text-pink leading-[1.4]">{error}</div>
+      )}
+
       <button
         onClick={handleSubmit}
-        className="mt-5 bg-cyan text-cyan-ink border-none rounded-[10px] py-[13px] text-[13.5px] font-bold cursor-pointer"
+        disabled={submitting}
+        className="mt-5 bg-cyan text-cyan-ink border-none rounded-[10px] py-[13px] text-[13.5px] font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+        {submitting ? 'Un momento…' : mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
       </button>
-      <div className="text-center text-[11px] text-ink/35 mt-3.5">
-        Cuenta de demostración — la autenticación real se conectará próximamente.
-      </div>
     </div>
   );
 }

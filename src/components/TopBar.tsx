@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { LogoIcon, Wordmark } from './Logo';
 
 function initials(name: string): string {
@@ -10,8 +11,9 @@ function initials(name: string): string {
 }
 
 export function TopBar() {
-  const { loggedIn, designer, account } = useApp();
-  const label = designer.name || account?.name || 'Diseñador(a)';
+  const { designer } = useApp();
+  const { user } = useAuth();
+  const label = designer.name || user?.displayName || 'Diseñador(a)';
 
   return (
     <div className="no-print flex items-center justify-between px-[22px] pt-2 pb-4 border-b border-white/6">
@@ -28,7 +30,7 @@ export function TopBar() {
         >
           i
         </Link>
-        {loggedIn ? (
+        {user ? (
           <div className="w-[30px] h-[30px] rounded-full bg-raised border border-white/10 flex items-center justify-center text-xs text-ink font-semibold">
             {initials(label)}
           </div>

@@ -8,6 +8,7 @@ import { BottomNav } from './components/BottomNav';
 import { ServiceDetailSheet } from './components/ServiceDetailSheet';
 import { RequireAuth } from './components/RequireAuth';
 import { useApp } from './context/AppContext';
+import { useAuth } from './context/AuthContext';
 import { PublicPrices } from './pages/PublicPrices';
 import { About } from './pages/About';
 import { Login } from './pages/Login';
@@ -20,11 +21,12 @@ import type { DetailContext } from './lib/detailContext';
 
 function Shell() {
   const { pathname } = useLocation();
-  const { loggedIn, catalog } = useApp();
+  const { catalog } = useApp();
+  const { user } = useAuth();
   const [detailProductId, setDetailProductId] = useState<number | null>(null);
   const detailItem = detailProductId != null ? catalog.find(p => p.id === detailProductId) ?? null : null;
 
-  const showBottomNav = loggedIn && pathname !== '/quote' && pathname !== '/preview' && pathname !== '/about';
+  const showBottomNav = !!user && pathname !== '/quote' && pathname !== '/preview' && pathname !== '/about';
   const outletCtx: DetailContext = { openDetail: setDetailProductId };
 
   return (

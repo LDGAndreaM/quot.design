@@ -13,16 +13,33 @@ Este proyecto es la implementación en producción del prototipo de diseño (`Co
 - [Vite](https://vite.dev/) como build tool
 - [Tailwind CSS v4](https://tailwindcss.com/) para estilos
 - [React Router](https://reactrouter.com/) para navegación
-- Estado en `Context` de React, persistido en `localStorage` (sin backend todavía — ver [Roadmap](#roadmap-para-producción-completa))
+- [Firebase Authentication](https://firebase.google.com/docs/auth) para registro/login real (correo + contraseña)
+- Estado de la app (catálogo, carrito, historial) en `Context` de React, persistido en `localStorage` por cuenta
+  (sin backend todavía — ver [Roadmap](#roadmap-para-producción-completa))
 
 ## Desarrollo
 
 ```bash
 npm install
+cp .env.example .env.local   # llena tus credenciales de Firebase (ver abajo)
 npm run dev       # servidor de desarrollo
 npm run build     # build de producción (tsc + vite build)
 npm run preview   # sirve el build de producción localmente
 ```
+
+### Configurar Firebase (registro/login real)
+
+1. Ve a [console.firebase.google.com](https://console.firebase.google.com) → **Agregar proyecto** (gratis).
+2. Dentro del proyecto: **Authentication → Get started → Sign-in method → Email/Password → habilitar**.
+3. **Project settings** (ícono de engrane) → pestaña **General** → baja hasta "Your apps" → clic en el ícono `</>`
+   (Web) → registra una app (el nombre no importa) → copia el objeto `firebaseConfig` que te muestra.
+4. Copia `.env.example` a `.env.local` y pega ahí cada valor (`apiKey` → `VITE_FIREBASE_API_KEY`, etc.). Este
+   archivo está en `.gitignore`, nunca se sube al repo.
+5. Para que el sitio publicado también tenga login funcionando, agrega las mismas 6 variables como:
+   - **Vercel**: Project Settings → Environment Variables (pégalas ahí, con los mismos nombres `VITE_FIREBASE_*`,
+     y vuelve a desplegar).
+   - **GitHub Pages**: Settings → Secrets and variables → Actions → New repository secret (una por cada
+     `VITE_FIREBASE_*` — el workflow `deploy.yml` ya está listo para leerlas).
 
 ## Estructura
 
@@ -90,18 +107,20 @@ es lo único que necesitas correr cada vez que cambies el código.
 - Ícono y splash screen de la app (usa [`@capacitor/assets`](https://github.com/ionic-team/capacitor-assets) para
   generarlos automáticamente a partir de un solo PNG/SVG fuente — hoy el proyecto usa el ícono placeholder de
   `public/favicon.svg`, hay que reemplazarlo por el logo final de Black and White Studio).
-- Política de privacidad pública (obligatoria en ambas stores, incluso para apps simples) — importante una vez que
-  el login/datos de cotizaciones sean reales y no solo `localStorage` de demo.
+- Política de privacidad pública (obligatoria en ambas stores, incluso para apps simples).
 - Capturas de pantalla y descripción de la ficha de la app.
 
 ## Roadmap para producción completa
 
 El prototipo original se construyó como una demo de un solo estado de React. Esta implementación ya usa rutas
-reales, componentes idiomáticos y persistencia en `localStorage`, pero para producción completa falta:
+reales, componentes idiomáticos, autenticación real vía Firebase, y persistencia en `localStorage` por cuenta.
+Para producción completa todavía falta:
 
-- **Autenticación real** (hoy el login es una demo sin backend — cualquier correo "inicia sesión").
-- **Backend/API** para guardar cuentas, precios personalizados e historial de cotizaciones por diseñador (hoy vive
-  en `localStorage` del navegador).
+- **Sincronizar los datos de la app entre dispositivos**: hoy el login (cuenta, correo, contraseña) es real y
+  funciona en cualquier dispositivo, pero el catálogo de precios personalizado, el historial de cotizaciones y el
+  perfil del diseñador siguen viviendo en `localStorage` del navegador — si inicias sesión en un dispositivo nuevo,
+  no verás tu historial anterior. El siguiente paso natural es guardar esos datos en Firestore, keyeados por el
+  `uid` de la cuenta.
 - **Generación de PDF real** (hoy "Descargar PDF" usa `window.print()`); se puede migrar a una librería como
   `jsPDF`/`html2canvas` o generación server-side.
 - **Subida de logo a almacenamiento real** (hoy se guarda como `data:` URL en el estado local).
