@@ -1,19 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { LogoIcon, Wordmark } from './Logo';
 
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return '·';
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
-}
-
 export function TopBar() {
-  const { designer } = useApp();
   const { user } = useAuth();
-  const label = designer.name || user?.displayName || 'Diseñador(a)';
 
   return (
     <div className="no-print flex items-center justify-between px-[22px] pt-2 pb-4 border-b border-white/6">
@@ -30,11 +20,7 @@ export function TopBar() {
         >
           i
         </Link>
-        {user ? (
-          <div className="w-[30px] h-[30px] rounded-full bg-raised border border-white/10 flex items-center justify-center text-xs text-ink font-semibold">
-            {initials(label)}
-          </div>
-        ) : (
+        {!user && (
           <Link
             to="/login"
             className="bg-ink text-shell rounded-[10px] px-3.5 py-2 text-[12.5px] font-semibold no-underline"

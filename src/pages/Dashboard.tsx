@@ -20,7 +20,7 @@ export function Dashboard() {
 
   return (
     <div className="px-[22px] pt-5 pb-[100px]">
-      <div className="text-[12.5px] text-ink/50 mb-0.5">Hola de nuevo,</div>
+      <div className="text-[12.5px] text-ink/50 mb-0.5">{history.length === 0 ? 'Bienvenido/a,' : 'Hola de nuevo,'}</div>
       <div className="font-display text-[22px] font-semibold text-ink mb-[18px]">{name}</div>
 
       <div className="grid grid-cols-2 gap-2.5 mb-5">
@@ -70,6 +70,9 @@ export function Dashboard() {
             onDelete={() => deleteHistoryItem(h.id)}
           />
         ))}
+        {recent.length === 0 && (
+          <div className="text-center text-ink/40 text-[13px] py-6">Aún no tienes cotizaciones.</div>
+        )}
       </div>
     </div>
   );

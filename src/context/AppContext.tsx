@@ -29,32 +29,11 @@ interface PersistedState {
   lastQuote: QuoteRecord | null;
 }
 
-const SEED_HISTORY: QuoteRecord[] = [
-  {
-    id: 'C-0012', client: 'Café Luna', date: '28 jun 2026', total: 9000, currency: 'MXN', status: 'Enviada',
-    items: [{ name: 'Paquete de 10 posts para redes', qty: 3, unitPrice: 3000 }],
-    notes: '', designer: { name: '', email: '', phone: '' }, clientInfo: { name: 'Café Luna', company: '', email: '' },
-    conditions: [], logoUrl: null, accentColor: ACCENTS[0],
-  },
-  {
-    id: 'C-0011', client: 'Estudio Norte', date: '15 jun 2026', total: 610, currency: 'USD', status: 'Aceptada',
-    items: [{ name: 'Logotipo - Pro', qty: 1, unitPrice: 295 }, { name: 'Diseño de flyer o volante', qty: 9, unitPrice: 35 }],
-    notes: '', designer: { name: '', email: '', phone: '' }, clientInfo: { name: 'Estudio Norte', company: '', email: '' },
-    conditions: [], logoUrl: null, accentColor: ACCENTS[0],
-  },
-  {
-    id: 'C-0010', client: 'Panadería Trigo', date: '30 may 2026', total: 4500, currency: 'MXN', status: 'Pendiente',
-    items: [{ name: 'Manual de identidad - Básico', qty: 1, unitPrice: 2800 }, { name: 'Diseño de menú de restaurante', qty: 1, unitPrice: 1700 }],
-    notes: '', designer: { name: '', email: '', phone: '' }, clientInfo: { name: 'Panadería Trigo', company: '', email: '' },
-    conditions: [], logoUrl: null, accentColor: ACCENTS[0],
-  },
-];
-
 function initialState(designer: DesignerProfile): PersistedState {
   return {
     catalog: CATALOG.map(p => ({ ...p })),
     designer,
-    history: SEED_HISTORY,
+    history: [],
     cart: {},
     quoteCurrency: 'MXN',
     client: { name: '', company: '', email: '' },
