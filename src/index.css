@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  --color-bg: #050506;
+  --color-shell: #0b0b0d;
+  --color-card: #16161a;
+  --color-inset: #0f0f12;
+  --color-raised: #1e1e23;
+  --color-ink: #f5f5f2;
+  --color-cyan: #22D3EE;
+  --color-cyan-ink: #062024;
+  --color-pink: #EC4899;
+  --color-yellow: #FACC15;
+  --color-paper: #fbfaf7;
+  --color-paper-ink: #1a1a1a;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    min-height: 100svh;
+  }
+
+  a {
+    color: var(--color-cyan);
+  }
+  a:hover {
+    color: #6fe6fb;
+  }
+
+  input, textarea, select, button {
+    font-family: inherit;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: rgba(245, 245, 242, 0.32);
+  }
+}
+
+.scrollarea::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollarea::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+@keyframes qd-splash-logo {
+  0% { opacity: 0; transform: scale(0.82); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes qd-splash-text {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes qd-splash-out {
+  0% { opacity: 1; pointer-events: auto; }
+  99% { opacity: 0; pointer-events: auto; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+.qd-splash-logo { animation: qd-splash-logo 0.7s cubic-bezier(.2,.8,.2,1) both; }
+.qd-splash-text { animation: qd-splash-text 0.6s ease-out 0.35s both; }
+.qd-splash-out { animation: qd-splash-out 0.45s ease-in 1.7s forwards; }
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0.4in;
+  }
+  .no-print {
+    display: none !important;
+  }
+  html, body, #root {
+    background: #fff !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  .app-shell {
+    height: auto !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  .quote-paper {
+    border-radius: 0 !important;
+  }
+  .scrollarea {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .scrollarea > * {
+    padding: 0 !important;
+  }
+}
