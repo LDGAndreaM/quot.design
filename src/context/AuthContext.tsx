@@ -1,7 +1,9 @@
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   updateProfile,
   type User,
@@ -32,16 +34,23 @@ function translateAuthError(code: string): string {
       return 'El inicio de sesión con correo/contraseña no está habilitado en Firebase todavía.';
     case 'auth/network-request-failed':
       return 'No se pudo conectar. Revisa tu conexión a internet e intenta de nuevo.';
+    case 'auth/popup-blocked':
+      return 'Tu navegador bloqueó la ventana de Google. Permite ventanas emergentes e intenta de nuevo.';
+    case 'auth/account-exists-with-different-credential':
+      return 'Ya existe una cuenta con ese correo usando otro método de acceso.';
     default:
       return code ? `Ocurrió un error (${code}). Intenta de nuevo.` : 'Ocurrió un error. Intenta de nuevo.';
   }
 }
+
+const CANCELLED_POPUP_CODES = new Set(['auth/popup-closed-by-user', 'auth/cancelled-popup-request']);
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   logIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   logOut: () => Promise<void>;
 }
 
@@ -81,10 +90,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    if (!auth) throw new Error(NOT_CONFIGURED_MESSAGE);
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? '';
+      if (CANCELLED_POPUP_CODES.has(code)) return;
+      console.error('Firebase signInWithGoogle error:', err);
+      throw new Error(translateAuthError(code));
+    }
+  };
+
   const logOut = () => (auth ? signOut(auth) : Promise.resolve());
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, logIn, logOut }}>
+    <AuthContext.Provider value={{ user, loading, signUp, logIn, signInWithGoogle, logOut }}>
       {children}
     </AuthContext.Provider>
   );

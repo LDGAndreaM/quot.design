@@ -84,6 +84,7 @@ interface AppContextValue extends PersistedState {
   generateQuote: () => QuoteRecord;
   cycleStatus: (id: string) => void;
   openHistoryItem: (record: QuoteRecord) => void;
+  deleteHistoryItem: (id: string) => void;
   resetWizardDraft: () => void;
 }
 
@@ -274,6 +275,10 @@ export function AppProvider({ children, storageKey, defaultDesigner }: AppProvid
     setState(s => ({ ...s, lastQuote: record }));
   }, [setState]);
 
+  const deleteHistoryItem = useCallback((id: string) => {
+    setState(s => ({ ...s, history: s.history.filter(h => h.id !== id) }));
+  }, [setState]);
+
   const value = useMemo<AppContextValue>(() => ({
     ...state,
     setDesignerField,
@@ -293,11 +298,12 @@ export function AppProvider({ children, storageKey, defaultDesigner }: AppProvid
     generateQuote,
     cycleStatus,
     openHistoryItem,
+    deleteHistoryItem,
     resetWizardDraft,
   }), [
     state, setDesignerField, setCatalogPrice, toggleCartItem, incQty, decQty,
     setCartPrice, switchCurrency, setClientField, setQuoteNotes, toggleCondition, addCondition,
-    removeCondition, setLogoUrl, setAccentColor, generateQuote, cycleStatus, openHistoryItem, resetWizardDraft,
+    removeCondition, setLogoUrl, setAccentColor, generateQuote, cycleStatus, openHistoryItem, deleteHistoryItem, resetWizardDraft,
   ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

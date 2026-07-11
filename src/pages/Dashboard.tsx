@@ -6,7 +6,7 @@ import { HistoryRow } from '../components/HistoryRow';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { designer, history, cycleStatus, openHistoryItem } = useApp();
+  const { designer, history, cycleStatus, openHistoryItem, deleteHistoryItem } = useApp();
   const { user } = useAuth();
 
   const name = designer.name || user?.displayName || 'Diseñador(a)';
@@ -62,7 +62,13 @@ export function Dashboard() {
       <div className="text-[11.5px] font-semibold uppercase tracking-[0.6px] text-ink/40 mb-2.5">Recientes</div>
       <div className="flex flex-col gap-2">
         {recent.map(h => (
-          <HistoryRow key={h.id} record={h} onOpen={() => open(h)} onCycleStatus={() => cycleStatus(h.id)} />
+          <HistoryRow
+            key={h.id}
+            record={h}
+            onOpen={() => open(h)}
+            onCycleStatus={() => cycleStatus(h.id)}
+            onDelete={() => deleteHistoryItem(h.id)}
+          />
         ))}
       </div>
     </div>

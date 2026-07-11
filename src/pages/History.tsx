@@ -4,7 +4,7 @@ import { HistoryRow } from '../components/HistoryRow';
 
 export function History() {
   const navigate = useNavigate();
-  const { history, cycleStatus, openHistoryItem } = useApp();
+  const { history, cycleStatus, openHistoryItem, deleteHistoryItem } = useApp();
 
   const open = (h: (typeof history)[number]) => {
     openHistoryItem(h);
@@ -19,7 +19,13 @@ export function History() {
       </div>
       <div className="flex flex-col gap-2">
         {history.map(h => (
-          <HistoryRow key={h.id} record={h} onOpen={() => open(h)} onCycleStatus={() => cycleStatus(h.id)} />
+          <HistoryRow
+            key={h.id}
+            record={h}
+            onOpen={() => open(h)}
+            onCycleStatus={() => cycleStatus(h.id)}
+            onDelete={() => deleteHistoryItem(h.id)}
+          />
         ))}
         {history.length === 0 && (
           <div className="text-center text-ink/40 text-[13px] py-10">Aún no tienes cotizaciones.</div>
